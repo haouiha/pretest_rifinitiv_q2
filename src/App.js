@@ -1,25 +1,54 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+
+const useCategories = (filter) => {
+	const [allCategories, setAllCategories] = useState([]);
+	const [categoriesItems, setCategoriesItems] = useState([]);
+
+	useEffect(() => {
+		const fetchCategories = async () => {
+			const res = await axios('https://api.publicapis.org/categories');
+			setAllCategories(res.data);
+		};
+		fetchCategories();
+	}, []);
+
+	useEffect(() => {
+		setCategoriesItems(
+			allCategories.filter((item) => {
+				return item.toUpperCase().indexOf(filter) > -1;
+			})
+		);
+	}, [filter, allCategories]);
+
+	return categoriesItems;
+};
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	const [filter, setFilter] = useState('');
+	const categoriesItems = useCategories(filter);
+
+	const handleChangeFilter = (e) => {
+		setFilter(e.target.value.toUpperCase());
+	};
+
+	return (
+		<>
+			<input className="input" type="text" placeholder="filter" onChange={handleChangeFilter}></input>
+			<table className="table">
+				<tbody>
+					<tr>
+						<th>Categories</th>
+					</tr>
+					{categoriesItems.map((item) => (
+						<tr key={item}>
+							<td>{item}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</>
+	);
 }
 
 export default App;
